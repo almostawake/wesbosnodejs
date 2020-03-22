@@ -1,6 +1,6 @@
 ## What is this?
 
-Just you wait folks!
+This is where I'm tracking my code for [Wes Bos's](https://wesbos.com/) excellent [Learn Node](https://wesbos.com/learn-node/) course.
 
 ## Sample Data
 

@@ -2,6 +2,11 @@
 
 This is where I'm tracking my code for [Wes Bos's](https://wesbos.com/) excellent [Learn Node](https://wesbos.com/learn-node/) course.
 
+```bash
+npm install
+nodemon start
+```
+
 ## Sample Data
 
 To load sample data, run the following command in your terminal:

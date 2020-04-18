@@ -32,8 +32,15 @@ const storeSchema = new mongoose.Schema({
             required: 'You must provide an address'
         }
     },
-    photo: String
+    photo: String, 
+    author: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: 'You must supply an author'
+    }
 });
+
+
 
 storeSchema.pre('save', async function(next) {
     if (!this.isModified('name')) {
@@ -56,5 +63,16 @@ storeSchema.statics.getTagList = function() {
     { $sort: {count: -1 }}
   ]);
 };
+
+// Define our indexes
+
+storeSchema.index({
+    name: 'text',
+    description: 'text'
+});
+
+storeSchema.index({
+    location: '2dsphere'
+});
 
 module.exports = mongoose.model('Store', storeSchema);

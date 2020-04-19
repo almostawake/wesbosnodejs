@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Store = mongoose.model('Store');
+const User = mongoose.model('User');
 const multer = require('multer');
 const jimp = require('jimp');
 const uuid = require('uuid');
@@ -16,10 +17,6 @@ const multerOptions = {
             next({ message: 'That file type isn\'t allowed' }, false);
         }
     }
-};
-
-exports.homePage = (req, res) => {
-    res.render('index');
 };
 
 exports.addStore = (req, res) => {
@@ -73,7 +70,7 @@ exports.updateStore = async (req, res) => {
 };
 
 exports.getStoreBySlug = async (req, res, next) => {
-    const store = await Store.findOne({ slug: req.params.slug }).populate('author');
+    const store = await Store.findOne({ slug: req.params.slug }).populate('author reviews');
     if (!store) return next();
     res.render('store', { store, title: store.name });
 
@@ -113,15 +110,15 @@ exports.storesNear = async (req, res) => {
     const coordinates = [req.query.lng, req.query.lat].map(parseFloat);
 
     const q = {
-            location: {
-                $near: {
-                    $geometry: {
-                        type: 'Point',
-                        coordinates
-                    },
-                    $maxDistance: 10000 //m
-                }
+        location: {
+            $near: {
+                $geometry: {
+                    type: 'Point',
+                    coordinates
+                },
+                $maxDistance: 10000 //m
             }
+        }
     };
 
     const stores = await Store.find(q).select('slug name description location photo').limit(10);
@@ -131,5 +128,29 @@ exports.storesNear = async (req, res) => {
 };
 
 exports.mapPage = (req, res) => {
-    res.render('map', {title: 'Map'});
+    res.render('map', { title: 'Map' });
+};
+
+exports.heartStore = async (req, res) => {
+    const hearts = req.user.hearts.map(obj => obj.toString());
+    const operator = hearts.includes(req.params.id) ? '$pull' : '$addToSet';
+    console.log(operator);
+    const user = await User
+        .findByIdAndUpdate(req.user._id,
+            { [operator]: { hearts: req.params.id } },
+            { new: true }
+        );
+    res.json(user);
+};
+
+exports.hearts = async (req, res) => {
+    const stores = await Store.find({
+        _id: { $in: req.user.hearts}
+    });
+    res.render('stores', { title: 'Hearted Stores', stores });
+}
+
+exports.top = async (req, res) => {
+    const stores = await Store.getTopStores();
+    res.render('topStores', {stores, title: 'Top Stores'});
 };
